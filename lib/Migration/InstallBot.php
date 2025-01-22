@@ -44,9 +44,9 @@ class InstallBot implements IRepairStep {
 		$event = new BotInstallEvent(
 			'Commands',
 			$secret,
-			Application::APP_ID,
+			'nextcloudapp://' . Application::APP_ID,
 			'',
-			Bot::FEATURE_EVENT | Bot::FEATURE_RESPONSE
+			Bot::FEATURE_EVENT
 		);
 		$this->dispatcher->dispatchTyped($event);
 	}

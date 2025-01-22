@@ -12,12 +12,17 @@ use OCA\CommandBot\AppInfo\Application;
 use OCA\Talk\Events\BotInvokeEvent;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
+use Psr\Log\LoggerInterface;
 
 /**
  * @template-implements IEventListener<Event>
  */
 class BotInvokeListener implements IEventListener {
+	public const PARTICIPANT_TYPE_OWNER = 1;
+	public const PARTICIPANT_TYPE_MODERATOR = 2;
+
 	public function __construct(
+		protected LoggerInterface $logger,
 	) {
 	}
 
@@ -26,17 +31,34 @@ class BotInvokeListener implements IEventListener {
 			return;
 		}
 
-		if ($event->getBotUrl() !== Application::APP_ID) {
+		if ($event->getBotUrl() !== 'nextcloudapp://' . Application::APP_ID) {
 			return;
 		}
 
 		$chatMessage = $event->getMessage();
-		if (!isset($chatMessage['actor']['talkParticipantType'])) {
-			// IF NOT MODERATOR, DO NOT ALLOW "!set …"
+		if ($chatMessage['type'] !== 'Create') {
+			$this->logger->debug('Not an even from creating a chat message: ' . $chatMessage['type']);
+			return;
 		}
 
-		$event->addReaction('👋');
-		$event->addAnswer('hello', true);
-		$event->addAnswer('hello again');
+		if (!isset($chatMessage['actor']['talkParticipantType'])) {
+			$this->logger->debug('Missing participant type in data');
+			return;
+		}
+
+		$content = json_decode($chatMessage['object']['content'], true);
+		if (str_starts_with($content['message'], '!set')
+			 && !in_array((int)$chatMessage['actor']['talkParticipantType'], [
+				self::PARTICIPANT_TYPE_OWNER,
+				self::PARTICIPANT_TYPE_MODERATOR,
+			], true)) {
+			// IF NOT MODERATOR, DO NOT ALLOW "!set …"
+			$this->logger->debug('Can not use !set unless being a moderator');
+			return;
+		}
+
+		if (str_starts_with($content['message'], '!set')) {
+			$event->addReaction('👍');
+		}
 	}
 }
