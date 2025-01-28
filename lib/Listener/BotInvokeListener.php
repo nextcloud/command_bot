@@ -9,7 +9,10 @@ declare(strict_types=1);
 namespace OCA\CommandBot\Listener;
 
 use OCA\CommandBot\AppInfo\Application;
+use OCA\CommandBot\Model\Command;
+use OCA\CommandBot\Model\CommandMapper;
 use OCA\Talk\Events\BotInvokeEvent;
+use OCP\AppFramework\Db\DoesNotExistException;
 use OCP\EventDispatcher\Event;
 use OCP\EventDispatcher\IEventListener;
 use Psr\Log\LoggerInterface;
@@ -23,6 +26,7 @@ class BotInvokeListener implements IEventListener {
 
 	public function __construct(
 		protected LoggerInterface $logger,
+		protected CommandMapper $mapper,
 	) {
 	}
 
@@ -61,42 +65,100 @@ class BotInvokeListener implements IEventListener {
 				$this->logger->debug('Can not use !set unless being a moderator');
 				return;
 			}
+
+			$message = trim($message);
+			if (!str_contains($message, ' ')) {
+				$event->addReaction('👎');
+				return;
+			}
+
+			[$command, $message] = explode(' ', $message, 2);
+			$command = strtolower($command);
+			if ($message === '' || strlen($command) < 2 || ($command[0] !== '!' && $command[0] !== '?')) {
+				$event->addReaction('👎');
+				return;
+			}
+
+			try {
+				$this->mapper->getCommandForConversation($chatMessage['target']['id'], $command);
+				$event->addReaction('👎');
+				return;
+			} catch (DoesNotExistException) {
+			}
+			$object = new Command();
+			$object->setToken($chatMessage['target']['id']);
+			$object->setCommand($command);
+			$object->setMessage($message);
+			$this->mapper->insert($object);
+			$event->addReaction('👍');
+			return;
+		}
+		if ($command === '!unset') {
+			if (!in_array((int)$chatMessage['actor']['talkParticipantType'], [
+					self::PARTICIPANT_TYPE_OWNER,
+					self::PARTICIPANT_TYPE_MODERATOR,
+				], true)) {
+				// IF NOT MODERATOR, DO NOT ALLOW "!set …"
+				$this->logger->debug('Can not use !set unless being a moderator');
+				return;
+			}
+
+			$command = trim($message);
+			if ($command === '') {
+				$event->addReaction('👎');
+				return;
+			}
+
+			try {
+				$object = $this->mapper->getCommandForConversation($chatMessage['target']['id'], $command);
+			} catch (DoesNotExistException) {
+				$event->addReaction('👎');
+				return;
+			}
+			$this->mapper->delete($object);
 			$event->addReaction('👍');
 			return;
 		}
 
-		if (str_starts_with($content['message'], '!set')) {
-			$event->addReaction('👍');
+		try {
+			$object = $this->mapper->getCommandForConversation($chatMessage['target']['id'], $command);
+		} catch (DoesNotExistException) {
+			$event->addReaction('👎');
+			return;
 		}
 
-		if ($command === '!hug') {
-			$string = '${sender} shows ${1} some love!';
+		$string = $object->getMessage();
 
-			$searches = $replacements = [];
-			if (str_contains($string, '${1}')) {
-				$searches[] = '${1}';
-				$mention = $this->getFirstMention($content['parameters']);
-				if ($mention === null) {
-					return;
-				}
-				$replacements[] = $mention;
+		$searches = $replacements = [];
+		if (str_contains($string, '${mention}')) {
+			$searches[] = '${mention}';
+			$mention = $this->getFirstMention($content['parameters']);
+			if ($mention === null) {
+				return;
 			}
-			if (str_contains($string, '${sender}')) {
-				$searches[] = '${sender}';
-				$replacements[] = $this->getSender($chatMessage['actor']);
-			}
+			$replacements[] = $mention;
+		}
 
-			$event->addAnswer(str_replace(
-				$searches,
-				$replacements,
-				$string
-			));
+		if (str_contains($string, '${sender}')) {
+			$searches[] = '${sender}';
+			$replacements[] = $this->getSender($chatMessage['actor']);
+		}
+
+		$answer = str_replace(
+			$searches,
+			$replacements,
+			$string
+		);
+
+		if ($answer !== '') {
+			$event->addAnswer($answer);
 		}
 	}
 
 	protected function getSender(array $actor): string {
 		[$type, $id] = explode('/', $actor['id'], 2);
 		$type = rtrim($type, 's');
+		// TODO check with federated users and guests
 		if ($type === 'user') {
 			return '@"' . $id . '"';
 		}

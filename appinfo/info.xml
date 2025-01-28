@@ -10,7 +10,7 @@
 	<summary><![CDATA[A simple "text in text out" bot to help with repeating questions and tasks]]></summary>
 	<description><![CDATA[Send `!command` for a list of known commands]]></description>
 
-	<version>1.0.0-dev.1</version>
+	<version>1.0.0-dev.2</version>
 	<licence>agpl</licence>
 
 	<author>Joas Schilling</author>
