@@ -131,17 +131,29 @@ class BotInvokeListener implements IEventListener {
 
 		$searches = $replacements = [];
 		if (str_contains($string, '${mention}')) {
-			$searches[] = '${mention}';
-			$mention = $this->getFirstMention($content['parameters']);
+			$mention = $this->getFirstMentionId($content['parameters']);
 			if ($mention === null) {
 				return;
 			}
+
+			$searches[] = '${mention}';
 			$replacements[] = $mention;
+		}
+
+		if (str_contains($string, '${text}')) {
+			$searches[] = '${text}';
+			$replacements[] = $this->getText($message, $content['parameters']);
 		}
 
 		if (str_contains($string, '${sender}')) {
 			$searches[] = '${sender}';
 			$replacements[] = $this->getSender($chatMessage['actor']);
+		}
+
+		if (str_contains($string, '${count}')) {
+			$this->mapper->increaseCount($object);
+			$searches[] = '${count}';
+			$replacements[] = (string)$object->getCount();
 		}
 
 		$answer = str_replace(
@@ -165,26 +177,35 @@ class BotInvokeListener implements IEventListener {
 		return '@"' . $type . '/' . $id . '"';
 	}
 
-	protected function getFirstMention(array $parameters): ?string {
+	protected function getFirstMentionId(array $parameters): ?string {
 		foreach ($parameters as $parameter) {
-			if ($parameter['type'] === 'call') {
-				return '@all';
-			}
-			if ($parameter['type'] === 'user') {
-				if (isset($parameter['server'])) {
-					return '@"federated_user/' . $parameter['id'] . '@' . $parameter['server'] . '"';
-				} else {
-					return '@"' . $parameter['id'] . '"';
-				}
-			}
-			if ($parameter['type'] === 'user-group') {
-				return '@"group/' . $parameter['id'] . '"';
-			}
-			if ($parameter['type'] === 'guest') {
-				return '@"guest/' . $parameter['id'] . '"';
+			$replace = $this->getMentionReplacement($parameter);
+			if ($replace !== null) {
+				return $replace;
 			}
 		}
 
 		return null;
+	}
+
+	protected function getText(string $message, array $parameters): ?string {
+		$search = $replacements = [];
+		foreach ($parameters as $key => $parameter) {
+			$replace = $this->getMentionReplacement($parameter);
+			$search[] = '{' . $key . '}';
+			$replacements[] = $replace ?? $parameter['name'];
+		}
+
+		return str_replace($search, $replacements, $message);
+	}
+
+	protected function getMentionReplacement(array $parameter): ?string {
+		return match($parameter['type']) {
+			'call' => '@all',
+			'user' => isset($parameter['server']) ? '@"federated_user/' . $parameter['id'] . '@' . $parameter['server'] . '"' : '@"' . $parameter['id'] . '"',
+			'user-group' => '@"group/' . $parameter['id'] . '"',
+			'guest' => '@"guest/' . $parameter['id'] . '"',
+			default => null,
+		};
 	}
 }

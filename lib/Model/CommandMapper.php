@@ -35,4 +35,17 @@ class CommandMapper extends QBMapper {
 			->andWhere($query->expr()->eq('command', $query->createNamedParameter($command)));
 		return $this->findEntity($query);
 	}
+
+	public function increaseCount(Command $command): Command {
+		$query = $this->db->getQueryBuilder();
+
+		$query->update($this->tableName)
+			->set('count', $query->func()->add('count', $query->expr()->literal(1)))
+			->where($query->expr()->eq('id', $query->createNamedParameter($command->getId())));
+		$query->executeStatement();
+
+		$command->setCount($command->getCount() + 1);
+
+		return $command;
+	}
 }
