@@ -80,16 +80,14 @@ class BotInvokeListener implements IEventListener {
 			}
 
 			try {
-				$this->mapper->getCommandForConversation($chatMessage['target']['id'], $command);
-				$event->addReaction('👎');
-				return;
+				$object = $this->mapper->getCommandForConversation($chatMessage['target']['id'], $command);
 			} catch (DoesNotExistException) {
+				$object = new Command();
+				$object->setToken($chatMessage['target']['id']);
+				$object->setCommand($command);
 			}
-			$object = new Command();
-			$object->setToken($chatMessage['target']['id']);
-			$object->setCommand($command);
 			$object->setMessage($message);
-			$this->mapper->insert($object);
+			$this->mapper->insertOrUpdate($object);
 			$event->addReaction('👍');
 			return;
 		}
@@ -130,29 +128,29 @@ class BotInvokeListener implements IEventListener {
 		$string = $object->getMessage();
 
 		$searches = $replacements = [];
-		if (str_contains($string, '${mention}')) {
+		if (str_contains($string, '{mention}')) {
 			$mention = $this->getFirstMentionId($content['parameters']);
 			if ($mention === null) {
 				return;
 			}
 
-			$searches[] = '${mention}';
+			$searches[] = '{mention}';
 			$replacements[] = $mention;
 		}
 
-		if (str_contains($string, '${text}')) {
-			$searches[] = '${text}';
+		if (str_contains($string, '{text}')) {
+			$searches[] = '{text}';
 			$replacements[] = $this->getText($message, $content['parameters']);
 		}
 
-		if (str_contains($string, '${sender}')) {
-			$searches[] = '${sender}';
+		if (str_contains($string, '{sender}')) {
+			$searches[] = '{sender}';
 			$replacements[] = $this->getSender($chatMessage['actor']);
 		}
 
-		if (str_contains($string, '${count}')) {
+		if (str_contains($string, '{count}')) {
 			$this->mapper->increaseCount($object);
-			$searches[] = '${count}';
+			$searches[] = '{count}';
 			$replacements[] = (string)$object->getCount();
 		}
 
