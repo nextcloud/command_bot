@@ -87,7 +87,11 @@ class BotInvokeListener implements IEventListener {
 				$object->setCommand($command);
 			}
 			$object->setMessage($message);
-			$this->mapper->insertOrUpdate($object);
+			if ($object->getId() !== null) {
+				$this->mapper->update($object);
+			} else {
+				$this->mapper->insert($object);
+			}
 			$event->addReaction('👍');
 			return;
 		}
@@ -115,6 +119,20 @@ class BotInvokeListener implements IEventListener {
 			}
 			$this->mapper->delete($object);
 			$event->addReaction('👍');
+			return;
+		}
+
+		if ($command === '!command' || $command === '!commands') {
+			$commands = $this->mapper->getCommandsForConversation($chatMessage['target']['id']);
+			if (empty($commands)) {
+				return;
+			}
+			$response = '```' . "\n";
+			foreach ($commands as $command) {
+				$response .= $command->getCommand() . ' - ' . $command->getMessage() . "\n";
+			}
+			$response .= '```' . "\n";
+			$event->addAnswer($response);
 			return;
 		}
 

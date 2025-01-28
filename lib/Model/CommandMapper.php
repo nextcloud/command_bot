@@ -36,6 +36,17 @@ class CommandMapper extends QBMapper {
 		return $this->findEntity($query);
 	}
 
+	/**
+	 * @return list<Command>
+	 */
+	public function getCommandsForConversation(string $token): array {
+		$query = $this->db->getQueryBuilder();
+		$query->select('*')
+			->from($this->getTableName())
+			->where($query->expr()->eq('token', $query->createNamedParameter($token)));
+		return $this->findEntities($query);
+	}
+
 	public function increaseCount(Command $command): Command {
 		$query = $this->db->getQueryBuilder();
 
