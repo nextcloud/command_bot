@@ -50,6 +50,11 @@ class BotInvokeListener implements IEventListener {
 			return;
 		}
 
+		$isModerator = in_array((int)$chatMessage['actor']['talkParticipantType'], [
+			self::PARTICIPANT_TYPE_OWNER,
+			self::PARTICIPANT_TYPE_MODERATOR,
+		], true);
+
 		$content = json_decode($chatMessage['object']['content'], true);
 		if ($content['message'][0] !== '!' && $content['message'][0] !== '?') {
 			return;
@@ -57,10 +62,7 @@ class BotInvokeListener implements IEventListener {
 
 		[$command, $message] = explode(' ', $content['message'] . ' ', 2);
 		if ($command === '!set') {
-			if (!in_array((int)$chatMessage['actor']['talkParticipantType'], [
-					self::PARTICIPANT_TYPE_OWNER,
-					self::PARTICIPANT_TYPE_MODERATOR,
-				], true)) {
+			if (!$isModerator) {
 				// IF NOT MODERATOR, DO NOT ALLOW "!set …"
 				$this->logger->debug('Can not use !set unless being a moderator');
 				return;
@@ -96,10 +98,7 @@ class BotInvokeListener implements IEventListener {
 			return;
 		}
 		if ($command === '!unset') {
-			if (!in_array((int)$chatMessage['actor']['talkParticipantType'], [
-					self::PARTICIPANT_TYPE_OWNER,
-					self::PARTICIPANT_TYPE_MODERATOR,
-				], true)) {
+			if (!$isModerator) {
 				// IF NOT MODERATOR, DO NOT ALLOW "!set …"
 				$this->logger->debug('Can not use !set unless being a moderator');
 				return;
@@ -127,11 +126,38 @@ class BotInvokeListener implements IEventListener {
 			if (empty($commands)) {
 				return;
 			}
-			$response = '```' . "\n";
+			$response = '### 💬 Available commands' . "\n";
+			$response .= '- **!command** - List all commands' . "\n";
 			foreach ($commands as $command) {
-				$response .= $command->getCommand() . ' - ' . $command->getMessage() . "\n";
+				$response .= '- **' . $command->getCommand() . '** - ';
+				$response .= $this->highlightParameters($command->getMessage());
+				if ($command->getCount()) {
+					$response .= ' - *Current count: ' . $command->getCount() . '*';
+				}
+				$response .= "\n";
 			}
-			$response .= '```' . "\n";
+			if ($isModerator) {
+				$response .= "\n";
+				$response .= '---';
+				$response .= "\n";
+				$response .= '### ⭐ Moderators' . "\n";
+				$response .= '- **!set** - Create or update a command' . "\n";
+				$response .= '  ```' . "\n";
+				$response .= '  !set !counter The counter was used {count} times' . "\n";
+				$response .= '  ```' . "\n";
+				$response .= '- **!unset** - Remove a command' . "\n";
+				$response .= '  ```' . "\n";
+				$response .= '  !unset !counter' . "\n";
+				$response .= '  ```' . "\n";
+				$response .= "\n";
+				$response .= '---';
+				$response .= "\n";
+				$response .= '### 💱 Placeholders' . "\n";
+				$response .= '- **{sender}** - Replaced with a mention of the sender' . "\n";
+				$response .= '- **{mention}** - Replaced with the first mention in the command' . "\n";
+				$response .= '- **{text}** - All text that was provided after the command' . "\n";
+				$response .= '- **{count}** - A counter how often the command was triggered already' . "\n";
+			}
 			$event->addAnswer($response);
 			return;
 		}
@@ -181,6 +207,14 @@ class BotInvokeListener implements IEventListener {
 		if ($answer !== '') {
 			$event->addAnswer($answer);
 		}
+	}
+
+	protected function highlightParameters(string $message): string {
+		return str_replace(
+			['{count}', '{mention}', '{sender}', '{text}'],
+			['*{count}*', '*{mention}*', '*{sender}*', '*{text}*'],
+			$message
+		);
 	}
 
 	protected function getSender(array $actor): string {
