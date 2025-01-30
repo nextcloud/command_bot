@@ -7,10 +7,10 @@
 	  xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
 	<id>command_bot</id>
 	<name>Command bot</name>
-	<summary><![CDATA[A simple "text in text out" bot to help with repeating questions and tasks]]></summary>
+	<summary><![CDATA[A simple "text in, text out" bot to help with repeating questions and tasks]]></summary>
 	<description><![CDATA[Send `!command` for a list of known commands]]></description>
 
-	<version>1.0.0-dev.2</version>
+	<version>1.0.0</version>
 	<licence>agpl</licence>
 
 	<author>Joas Schilling</author>
@@ -25,12 +25,11 @@
 	<category>social</category>
 	<category>workflow</category>
 
-	<website>https://github.com/nextcloud/call_summary_bot</website>
-	<bugs>https://github.com/nextcloud/call_summary_bot/issues</bugs>
-	<repository>https://github.com/nextcloud/call_summary_bot.git</repository>
+	<website>https://github.com/nextcloud/command_bot</website>
+	<bugs>https://github.com/nextcloud/command_bot/issues</bugs>
+	<repository>https://github.com/nextcloud/command_bot.git</repository>
 
-	<screenshot>https://raw.githubusercontent.com/nextcloud/call_summary_bot/main/docs/screenshot.png</screenshot>
-	<screenshot>https://raw.githubusercontent.com/nextcloud/call_summary_bot/main/docs/agenda.png</screenshot>
+	<screenshot>https://raw.githubusercontent.com/nextcloud/command_bot/main/docs/screenshot.png</screenshot>
 
 	<dependencies>
 		<nextcloud min-version="31" max-version="31" />
