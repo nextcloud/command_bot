@@ -42,10 +42,10 @@ class InstallBot implements IRepairStep {
 		}
 
 		$event = new BotInstallEvent(
-			'Commands',
+			'Command',
 			$secret,
 			'nextcloudapp://' . Application::APP_ID,
-			'',
+			'Send a chat message "!command" to learn which commands and placeholders are available',
 			Bot::FEATURE_EVENT
 		);
 		$this->dispatcher->dispatchTyped($event);
