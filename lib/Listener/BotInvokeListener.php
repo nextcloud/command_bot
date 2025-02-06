@@ -205,7 +205,13 @@ class BotInvokeListener implements IEventListener {
 		);
 
 		if ($answer !== '') {
-			$event->addAnswer($answer);
+			if (isset($chatMessage['object']['inReplyTo']['actor']['id'])
+				&& !str_starts_with($chatMessage['object']['inReplyTo']['actor']['id'], 'bot/')) {
+				$answer = $this->getSender($chatMessage['object']['inReplyTo']['actor']) . ' ' . $answer;
+				$event->addAnswer($answer, (int)$chatMessage['object']['inReplyTo']['object']['id']);
+			} else {
+				$event->addAnswer($answer);
+			}
 		}
 	}
 
