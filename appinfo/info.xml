@@ -10,7 +10,7 @@
 	<summary><![CDATA[A simple "text in, text out" bot to help with repeating questions and tasks]]></summary>
 	<description><![CDATA[Send `!command` for a list of known commands]]></description>
 
-	<version>1.0.1</version>
+	<version>1.0.2</version>
 	<licence>agpl</licence>
 
 	<author>Joas Schilling</author>
@@ -32,7 +32,7 @@
 	<screenshot>https://raw.githubusercontent.com/nextcloud/command_bot/main/docs/screenshot.png</screenshot>
 
 	<dependencies>
-		<nextcloud min-version="31" max-version="31" />
+		<nextcloud min-version="31" max-version="32" />
 	</dependencies>
 
 	<repair-steps>

@@ -123,7 +123,8 @@ class BotInvokeListener implements IEventListener {
 
 		if ($command === '!command' || $command === '!commands') {
 			$commands = $this->mapper->getCommandsForConversation($chatMessage['target']['id']);
-			if (empty($commands)) {
+			if (!$isModerator && empty($commands)) {
+				$event->addAnswer('*No commands configured*', true);
 				return;
 			}
 			$response = '### 💬 Available commands' . "\n";
