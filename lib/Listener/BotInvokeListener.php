@@ -41,7 +41,7 @@ class BotInvokeListener implements IEventListener {
 
 		$chatMessage = $event->getMessage();
 		if ($chatMessage['type'] !== 'Create') {
-			$this->logger->debug('Not an even from creating a chat message: ' . $chatMessage['type']);
+			$this->logger->debug('Not an event from creating a chat message: ' . $chatMessage['type']);
 			return;
 		}
 

@@ -1,0 +1,22 @@
+# phpStorm
+.idea
+*.iml
+
+# Mac OS
+.DS_Store
+
+# WebPack
+/node_modules
+
+# Tests - auto-generated files
+/tests/coverage*
+/tests/clover.xml
+/tests/.phpunit.result.cache
+/tests/.phpunit.cache
+/.php-cs-fixer.cache
+
+
+# Build related files
+/build
+/vendor
+/vendor-bin/*/vendor
