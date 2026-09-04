@@ -30,6 +30,7 @@ class BotInvokeListener implements IEventListener {
 	) {
 	}
 
+	#[\Override]
 	public function handle(Event $event): void {
 		if (!$event instanceof BotInvokeEvent) {
 			return;
@@ -185,7 +186,7 @@ class BotInvokeListener implements IEventListener {
 
 		if (str_contains($string, '{text}')) {
 			$searches[] = '{text}';
-			$replacements[] = $this->getText($message, $content['parameters']);
+			$replacements[] = (string)$this->getText($message, $content['parameters']);
 		}
 
 		if (str_contains($string, '{sender}')) {
