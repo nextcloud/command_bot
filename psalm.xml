@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<psalm
+	errorLevel="4"
+	findUnusedBaselineEntry="true"
+	findUnusedCode="false"
+	resolveFromConfigFile="true"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="https://getpsalm.org/schema/config"
+	xsi:schemaLocation="https://getpsalm.org/schema/config"
+	errorBaseline="tests/psalm-baseline.xml"
+	phpVersion="8.3"
+>
+	<projectFiles>
+		<directory name="lib" />
+		<ignoreFiles>
+			<directory name="vendor" />
+			<directory name="vendor-bin" />
+		</ignoreFiles>
+	</projectFiles>
+	<extraFiles>
+		<directory name="vendor" />
+		<directory name="vendor-bin" />
+	</extraFiles>
+	<stubs>
+		<file name="tests/stubs.php" />
+	</stubs>
+</psalm>

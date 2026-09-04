@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 Nextcloud GmbH and Nextcloud contributors
+# SPDX-License-Identifier: AGPL-3.0-or-later
+version = 1
+SPDX-PackageName = "command_bot"
+SPDX-PackageSupplier = "Nextcloud <info@nextcloud.com>"
+SPDX-PackageDownloadLocation = "https://github.com/nextcloud/command_bot/"
+
+[[annotations]]
+path = [".github/CODEOWNERS", ".github/dependabot.yml", ".github/workflows/**.patch"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "none"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["package.json", "package-lock.json", ".git-blame-ignore-revs", "**/package.json", "**/package-lock.json", "composer.json", "composer.lock", "**/composer.json", "**/composer.lock", ".gitignore", ".l10nignore", "psalm.xml", "tests/psalm-baseline.xml", "vendor-bin/**/composer.json", "vendor-bin/**/composer.lock", ".tx/config", ".tx/backport", "**/phpunit.xml", "tsconfig.json", "redocly.yaml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "none"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = ["docs/screenshot.png"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Nextcloud GmbH and Nextcloud contributors"
+SPDX-License-Identifier = "CC0-1.0"
