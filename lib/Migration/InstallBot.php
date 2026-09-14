@@ -25,10 +25,12 @@ class InstallBot implements IRepairStep {
 	) {
 	}
 
+	#[\Override]
 	public function getName(): string {
 		return 'Install as Talk bot';
 	}
 
+	#[\Override]
 	public function run(IOutput $output): void {
 		if (!class_exists(BotInstallEvent::class)) {
 			$output->warning('Talk not found, not installing bots');
