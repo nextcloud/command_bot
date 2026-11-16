@@ -19,7 +19,6 @@
 	</projectFiles>
 	<extraFiles>
 		<directory name="vendor" />
-		<directory name="vendor-bin" />
 	</extraFiles>
 	<stubs>
 		<file name="tests/stubs.php" />
