@@ -11,6 +11,8 @@
 name: Update workflows
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "45 22 * * 6"
 
 permissions:
   contents: read

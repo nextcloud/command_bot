@@ -1,0 +1,13 @@
+diff --git a/.github/workflows/sync-workflow-templates.yml b/.github/workflows/sync-workflow-templates.yml
+index 3774bd9..f004049 100644
+--- a/.github/workflows/sync-workflow-templates.yml
++++ b/.github/workflows/sync-workflow-templates.yml
+@@ -11,6 +11,8 @@
+ name: Update workflows
+ on:
+   workflow_dispatch:
++  schedule:
++    - cron: "45 22 * * 6"
+ 
+ permissions:
+   contents: read
